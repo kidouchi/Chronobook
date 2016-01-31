@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="kidouchi.chronobook.activities.EventFormActivity"
+    tools:showIn="@layout/activity_event_form">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- PLACEHOLDER -->
+
+            <TextView
+                android:id="@+id/event_form_placeholder_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="Placeholder"
+                android:textSize="18dp"/>
+
+            <kidouchi.chronobook.RoundedCornersImageView
+                android:id="@+id/event_form_placeholder_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:padding="2dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/solid_border_rect"
+                tools:src="@drawable/rounded_rect_green"
+                />
+
+            <Button
+                android:id="@+id/event_form_placeholder_upload_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:onClick="onUpload"
+                android:background="@color/placeholder_button_color"
+                android:text="Upload Image"
+                android:textColor="@android:color/white"/>
+
+            <!-- TITLE -->
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/event_form_title_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:counterEnabled="true"
+                app:counterMaxLength="80">
+                <EditText
+                    android:id="@+id/event_form_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="Title"
+                    android:inputType="text"
+                    android:maxLength="80"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <!-- DESCRIPTION -->
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/event_form_desc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:counterEnabled="true"
+                app:counterMaxLength="140">
+                <EditText
+                    android:id="@+id/event_form_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_subject_grey_500_36dp"
+                    android:drawablePadding="8dp"
+                    android:ems="10"
+                    android:gravity="center_vertical"
+                    android:hint="Description"
+                    android:inputType="textMultiLine"
+                    android:maxLength="140"/>
+            </android.support.design.widget.TextInputLayout>
+
+
+            <!-- START DATE -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
+                <Button
+                    android:id="@+id/event_form_start_date_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_rect_green"
+                    android:drawableLeft="@drawable/ic_event_white_36dp"
+                    android:ems="7"
+                    android:gravity="center"
+                    android:onClick="showDatePickerDialog"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="Start Date"
+                    android:textColor="#fff"/>
+
+                <TextView
+                    android:id="@+id/event_form_start_date_btn_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/solid_border_rect"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:textStyle="bold"
+                    tools:text="12/4/2015"/>
+            </LinearLayout>
+
+            <!--END DATE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/event_form_end_date_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_rect_green"
+                    android:drawableLeft="@drawable/ic_event_white_36dp"
+                    android:ems="7"
+                    android:gravity="center"
+                    android:onClick="showDatePickerDialog"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="End Date"
+                    android:textColor="#fff"/>
+
+                <TextView
+                    android:id="@+id/event_form_end_date_btn_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/solid_border_rect"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:textStyle="bold"
+                    tools:text="12/15/2015"/>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="All Day"/>
+
+            <!-- START TIME -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginTop="10dp"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
+                <Button
+                    android:id="@+id/event_form_start_time_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_rect_gray"
+                    android:drawableLeft="@drawable/ic_access_time_white_36dp"
+                    android:ems="7"
+                    android:gravity="center"
+                    android:onClick="showTimePickerDialog"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="Start Time"
+                    android:textColor="#fff"/>
+
+                <TextView
+                    android:id="@+id/event_form_start_time_btn_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/solid_border_rect"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:textStyle="bold"
+                    tools:text="12:00 AM"/>
+            </LinearLayout>
+
+            <!-- END TIME -->
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginTop="10dp"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
+                <Button
+                    android:id="@+id/event_form_end_time_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_rect_gray"
+                    android:drawableLeft="@drawable/ic_access_time_white_36dp"
+                    android:ems="7"
+                    android:gravity="center"
+                    android:onClick="showTimePickerDialog"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="End Time"
+                    android:textColor="#fff"/>
+
+                <TextView
+                    android:id="@+id/event_form_end_time_btn_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/solid_border_rect"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:textStyle="bold"
+                    tools:text="1:00 PM"/>
+            </LinearLayout>
+
+            <!-- STREET ADDRESS -->
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:counterEnabled="true"
+                app:counterMaxLength="80">
+                <EditText
+                    android:id="@+id/event_form_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp"
+                    android:drawableLeft="@drawable/ic_location_on_grey_36dp"
+                    android:hint="Street Address"
+                    android:inputType="textPostalAddress"
+                    android:maxLength="80"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <!-- CITY, STATE, ZIPCODE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="5">
+                    <EditText
+                        android:id="@+id/event_form_city"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="City"
+                        android:inputType="text"
+                        android:maxLength="20"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <Spinner
+                    android:id="@+id/event_form_state"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="2"
+                    android:entries="@array/states_abbreviation"
+                    android:spinnerMode="dropdown"/>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3">
+                    <EditText
+                        android:id="@+id/event_form_zipcode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="ZipCode"
+                        android:inputType="number"
+                        android:maxLength="5"/>
+                </android.support.design.widget.TextInputLayout>
+
+            </LinearLayout>
+
+
+            <!-- Event Background -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_weight="3"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/event_form_category_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="2"
+                    android:background="@color/wallet_holo_blue_light"
+                    android:ems="7"
+                    android:gravity="center"
+                    android:onClick="showEventCategoryDialog"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="Event Category"
+                    android:textColor="#fff"/>
+
+                <ImageView
+                    android:id="@+id/category_image_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/event_form_button_and_field_height"
+                    android:layout_weight="3"
+                    android:background="@drawable/solid_border_rect"
+                    android:padding="8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
