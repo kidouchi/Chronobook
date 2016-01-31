@@ -1,6 +1,7 @@
 package kidouchi.chronobook;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
@@ -15,13 +16,17 @@ public class AlarmIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        // Launch alarm notification here
+        // Create notification
         NotificationCompat.Builder mNotification =
                 new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.ic_time_grey_36dp)
-                    .setContentTitle("An Event Has Started!")
-                    .setContentText(intent.getStringExtra("eventTitle"));
+                    .setContentTitle(intent.getStringExtra("eventTitle") + " has started!")
+                    .setAutoCancel(true);
 
-        mNotification.setAutoCancel(true);
+        NotificationManager mNotifyManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+
+        // Build and issue notification
+        mNotifyManager.notify(1, mNotification.build());
     }
 }

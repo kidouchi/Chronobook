@@ -19,7 +19,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -178,10 +177,11 @@ public class EventFormActivity extends FragmentActivity
     }
 
     private void setAlarm(long targetDateTime, String eventTitle) {
+        // Set up alarm
         Intent i = new Intent(getApplicationContext(), AlarmReceiver.class);
-        final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
-                i, PendingIntent.FLAG_UPDATE_CURRENT);
         i.putExtra("eventTitle", eventTitle); // Send notification title
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
+                i, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         alarm.set(AlarmManager.RTC_WAKEUP, targetDateTime, pIntent);
     }
@@ -203,8 +203,6 @@ public class EventFormActivity extends FragmentActivity
                     .into(mPlaceholderImageView);
 
             Uri uri = data.getData();
-            Log.d("CHECK", getRealPathFromURI(this, uri));
-            Log.d("CHECK", data.getData().getPath() + " " + data.getData().toString());
             placeholderFilepath = getRealPathFromURI(this, uri);
         }
     }
@@ -214,7 +212,6 @@ public class EventFormActivity extends FragmentActivity
 
         // Extract the COLUMN_DOCUMENT_ID from the given URI.
         String docID = DocumentsContract.getDocumentId(uri);
-        Log.d("WHOLE ID", docID);
 
         // Split at colon, use second item in the array
         // ex. image:90 --> retrieve 90
@@ -252,13 +249,11 @@ public class EventFormActivity extends FragmentActivity
     private long convertDateTimeToLong(String date, String time) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a MM/dd/yyyy", Locale.US);
         dateFormat.setTimeZone(TimeZone.getDefault());
-        Log.d("START TIME", "" + dateFormat.parse(time + " " + date).getTime());
         return dateFormat.parse(time + " " + date).getTime();
     }
 
     private void setupTitleError() {
         final TextInputLayout titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
-        Log.d("TITLE IS FOCUSED", mTitleEditText.isFocused() + "");
         if (!mTitleEditText.isFocused()) {
             if (mTitleEditText.getText().length() == 0) {
                 titleLabel.setError(getString(R.string.title_required));
