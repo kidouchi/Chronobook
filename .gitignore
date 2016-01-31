@@ -1,1 +1,17 @@
+.gradle/
+gradle/
+.idea/
+build/
 *.iml
+app/src/release
+app/proguard-rules.pro
+app/src/debug/
+app/app-release.apk
+app/google-services.json
+build.gradle
+gradlew
+gradlew.bat
+local.properties
+gradle.properties
+settings.gradle
+
