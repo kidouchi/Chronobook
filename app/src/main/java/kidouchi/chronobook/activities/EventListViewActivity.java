@@ -6,13 +6,16 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import kidouchi.chronobook.EventCardTouchCallback;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.adapters.RVEventAdapter;
 import kidouchi.chronobook.models.Event;
@@ -20,6 +23,7 @@ import kidouchi.chronobook.models.Event;
 public class EventListViewActivity extends Activity {
 
     private Realm realm;
+    private ItemTouchHelper mItemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +53,8 @@ public class EventListViewActivity extends Activity {
         RealmResults<Event> result = realm.where(Event.class).findAll();
         result.sort("startDateTime"); // Sorts in ascending order
         Event[] events = new Event[result.size()];
-        RVEventAdapter adapter = new RVEventAdapter(Arrays.asList(result.toArray(events)), this);
+        RVEventAdapter adapter = new RVEventAdapter(
+                new ArrayList<>(Arrays.asList(result.toArray(events))), this);
         adapter.notifyDataSetChanged();
 
         rvEventList.setAdapter(adapter);
@@ -58,6 +63,10 @@ public class EventListViewActivity extends Activity {
         rvEventList.setLayoutManager(layoutManager);
         rvEventList.setNestedScrollingEnabled(false);
         rvEventList.setHasFixedSize(false);
+
+        ItemTouchHelper.Callback cb = new EventCardTouchCallback(adapter);
+        mItemTouchHelper = new ItemTouchHelper(cb);
+        mItemTouchHelper.attachToRecyclerView(rvEventList);
     }
 
     @Override

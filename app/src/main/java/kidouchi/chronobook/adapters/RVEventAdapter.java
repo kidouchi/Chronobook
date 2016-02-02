@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+import kidouchi.chronobook.EventCardTouchHelperAdapter;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
@@ -23,10 +25,12 @@ import kidouchi.chronobook.models.Location;
 /**
  * Created by iuy407 on 11/21/15.
  */
-public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHolder> {
+public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHolder>
+        implements EventCardTouchHelperAdapter {
 
     public static Context context;
     private List<Event> mEvents;
+    private Realm realm;
 
     public RVEventAdapter(List<Event> events, Context context) {
         this.mEvents = events;
@@ -36,6 +40,8 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        realm = Realm.getDefaultInstance();
 
         // Inflate event item layout
         View eventView = inflater.inflate(R.layout.event_list_item, parent, false);
@@ -52,6 +58,28 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
     @Override
     public int getItemCount() {
         return mEvents.size();
+    }
+
+    /**
+     * Interface EventCardTouchCallback#onItemRemove
+     *
+     * @param pos
+     */
+    @Override
+    public void onItemRemove(int pos) {
+//        mEvents.remove(pos);
+        mEvents.remove(mEvents.get(pos));
+
+        // Remove from database
+//        realm.beginTransaction();
+//
+//        Event event = mEvents.get(pos);
+//        event.removeFromRealm();
+//
+//        realm.commitTransaction();
+
+        notifyItemRemoved(pos);
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
