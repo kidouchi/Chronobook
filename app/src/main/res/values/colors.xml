@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+
+    <color name="undo_button_color">#009688</color>
+    <color name="remove_button_color">#EF5350</color>
+
     <color name="calendar_color_scheme">#66BB6A</color>
     <color name="time_color_scheme">#424242</color>
 

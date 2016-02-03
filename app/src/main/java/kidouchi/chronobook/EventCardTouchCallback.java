@@ -37,7 +37,30 @@ public class EventCardTouchCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
+    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+        if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+            if (viewHolder instanceof EventCardTouchViewHolder) {
+                ((EventCardTouchViewHolder) viewHolder).onItemSelected();
+            }
+        }
+
+        super.onSelectedChanged(viewHolder, actionState);
+    }
+
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+
+        if (viewHolder instanceof EventCardTouchViewHolder) {
+            ((EventCardTouchViewHolder) viewHolder).onItemClear();
+        }
+    }
+
+    @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+        if (viewHolder instanceof EventCardTouchViewHolder) {
+            ((EventCardTouchViewHolder) viewHolder).onItemSwiped();
+        }
         mAdapter.onItemRemove(viewHolder.getAdapterPosition());
     }
 }
