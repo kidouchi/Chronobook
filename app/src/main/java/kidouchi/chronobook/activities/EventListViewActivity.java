@@ -54,7 +54,7 @@ public class EventListViewActivity extends Activity {
         result.sort("startDateTime"); // Sorts in ascending order
         Event[] events = new Event[result.size()];
         RVEventAdapter adapter = new RVEventAdapter(
-                new ArrayList<>(Arrays.asList(result.toArray(events))), this);
+                new ArrayList<>(Arrays.asList(result.toArray(events))), this, rvEventList);
         adapter.notifyDataSetChanged();
 
         rvEventList.setAdapter(adapter);

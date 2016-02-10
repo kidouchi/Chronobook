@@ -47,6 +47,16 @@ import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
 
+
+//TODO: Add Delete Button Logic
+// Remove from database
+//        realm.beginTransaction();
+//
+//        Event event = mEvents.get(pos);
+//        event.removeFromRealm();
+//
+//        realm.commitTransaction();
+
 public class EventFormActivity extends FragmentActivity
         implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener,
         EventCategoryFragment.CategoryChosenListener {

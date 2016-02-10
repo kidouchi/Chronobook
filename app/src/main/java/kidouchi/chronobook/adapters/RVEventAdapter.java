@@ -8,8 +8,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -35,10 +36,13 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
     public static Context context;
     private List<Event> mEvents;
     private Realm realm;
+    public static int SELECT_ANIM_DURATION = 200;
+    private RecyclerView mRecyclerView;
 
-    public RVEventAdapter(List<Event> events, Context context) {
+    public RVEventAdapter(List<Event> events, Context context, RecyclerView recyclerView) {
         this.mEvents = events;
         this.context = context;
+        this.mRecyclerView = recyclerView;
     }
 
     @Override
@@ -64,26 +68,15 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
         return mEvents.size();
     }
 
-    /**
-     * Interface EventCardTouchCallback#onItemRemove
-     *
-     * @param pos
-     */
     @Override
-    public void onItemRemove(int pos) {
-//        mEvents.remove(pos);
-        mEvents.remove(mEvents.get(pos));
-
-        // Remove from database
-//        realm.beginTransaction();
-//
-//        Event event = mEvents.get(pos);
-//        event.removeFromRealm();
-//
-//        realm.commitTransaction();
-
+    public void onItemDismiss(final int pos, final View itemView) {
         notifyItemRemoved(pos);
-        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onItemDismissUndone(int pos) {
+        notifyItemInserted(pos);
+        notifyItemRangeChanged(pos+1, getItemCount());
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
@@ -94,8 +87,10 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
         private TextView mEventDate;
         private TextView mEventTime;
         private TextView mEventLocation;
-        private ImageButton mRemoveButton;
-        private ImageButton mUndoButton;
+
+        private RelativeLayout mCardHeader;
+        private LinearLayout mCardBody;
+        private RelativeLayout mCard;
 
         private TextView mEventAlarm; // TODO
 //        private TextView mEventDescription;
@@ -110,8 +105,10 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             mEventDate = (TextView) itemView.findViewById(R.id.event_date);
             mEventTime = (TextView) itemView.findViewById(R.id.event_time);
             mEventLocation = (TextView) itemView.findViewById(R.id.event_location);
-            mRemoveButton = (ImageButton) itemView.findViewById(R.id.event_remove_button);
-            mUndoButton = (ImageButton) itemView.findViewById(R.id.event_undo_button);
+
+            mCard = (RelativeLayout) itemView.findViewById(R.id.event_card);
+            mCardHeader = (RelativeLayout) itemView.findViewById(R.id.card_header);
+            mCardBody = (LinearLayout) itemView.findViewById(R.id.card_body);
 //            mEventAlarm = (TextView) itemView.findViewById(R.id.event_alarm);
 //            mEventDescription = (TextView) itemView.findViewById(R.id.event_description);
         }
@@ -150,9 +147,6 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
                     loc.getState() + " " + loc.getZipcode());
 
 //            mEventDescription.setText(event.getDescription());
-
-            mRemoveButton.setVisibility(View.INVISIBLE);
-            mUndoButton.setVisibility(View.INVISIBLE);
         }
 
         @Override
@@ -160,7 +154,7 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 ViewCompat.setElevation(itemView, 15.0f);
             } else {
-                itemView.animate().setDuration(500).translationZ(15.0f);
+                itemView.animate().setDuration(SELECT_ANIM_DURATION).translationZ(15.0f);
                 itemView.setElevation(15.0f);
             }
         }
@@ -170,17 +164,9 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 ViewCompat.setElevation(itemView, 2.0f);
             } else {
-                itemView.animate().setDuration(500).translationZ(2.0f);
+                itemView.animate().setDuration(SELECT_ANIM_DURATION).translationZ(2.0f);
                 itemView.setElevation(2.0f);
             }
-        }
-
-        @Override
-        public void onItemSwiped() {
-            mRemoveButton.setTranslationX(-100.0f);
-            mRemoveButton.setX(-100.0f);
-            mRemoveButton.setVisibility(View.VISIBLE);
-            mUndoButton.setVisibility(View.VISIBLE);
         }
     }
 }

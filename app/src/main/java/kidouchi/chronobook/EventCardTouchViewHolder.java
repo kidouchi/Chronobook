@@ -21,9 +21,4 @@ public interface EventCardTouchViewHolder {
      * has complete the swipe/move motion and active item state is cleared
      */
     void onItemClear();
-
-    /**
-     * Called when the item has been completely swiped
-     */
-    void onItemSwiped();
 }

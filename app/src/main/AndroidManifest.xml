@@ -53,16 +53,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key"/>
 
-        <activity
-            android:name=".activities.MapsActivity"
-            android:label="@string/title_activity_maps">
-        </activity>
-        <activity
-            android:name=".activities.EventViewActivity"
-            android:label="@string/title_activity_event_view"
-            android:theme="@style/AppTheme">
-        </activity>
-
         <receiver android:name="kidouchi.chronobook.AlarmReceiver"
                   android:process=":remote"
                   android:enabled="true"/>
