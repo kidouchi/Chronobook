@@ -141,4 +141,5 @@
     </string-array>
     <string name="title_activity_event_view">EventViewActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="delete">Delete</string>
 </resources>

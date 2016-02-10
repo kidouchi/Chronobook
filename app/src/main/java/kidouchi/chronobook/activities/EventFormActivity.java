@@ -16,9 +16,12 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -47,23 +50,15 @@ import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
 
-
-//TODO: Add Delete Button Logic
-// Remove from database
-//        realm.beginTransaction();
-//
-//        Event event = mEvents.get(pos);
-//        event.removeFromRealm();
-//
-//        realm.commitTransaction();
-
-public class EventFormActivity extends FragmentActivity
+public class EventFormActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener,
         EventCategoryFragment.CategoryChosenListener {
 
     private static final int REQUEST_CHOOSE_IMAGE = 1012;
 
-    /** VIEWS **/
+    /**
+     * VIEWS
+     **/
     private EditText mTitleEditText;
     private EditText mDescEditText;
     private EditText mStreetEditText;
@@ -73,7 +68,7 @@ public class EventFormActivity extends FragmentActivity
 
     private TextView mPlaceholderTextView;
     private Bitmap mPlaceholderBitmap;
-//    private ImageView mPlaceholderImageView;
+    //    private ImageView mPlaceholderImageView;
     private RoundedCornersImageView mPlaceholderImageView;
     private Button mPlaceholderUploadBtn;
 
@@ -91,19 +86,53 @@ public class EventFormActivity extends FragmentActivity
     private ImageView mCategoryImageView;
     private FloatingActionButton mSubmitButton;
 
-    /** GLOBAL VARIABLES **/
+    /**
+     * GLOBAL VARIABLES
+     **/
     private Realm realm;
     private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
     private Button pressedButton; // Holds reference to what button was most recently pressed
     private int categoryDrawableId = 0; // Holds most recently chosen category drawable id
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
 
+    public static String getRealPathFromURI(Context context, Uri uri) {
+        String filePath = "";
+
+        // Extract the COLUMN_DOCUMENT_ID from the given URI.
+        String docID = DocumentsContract.getDocumentId(uri);
+
+        // Split at colon, use second item in the array
+        // ex. image:90 --> retrieve 90
+        String id = docID.split(":")[1];
+
+        String[] column = {MediaStore.Images.Media.DATA};
+
+        // where id is equal to
+        String selection = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                column,
+                selection,
+                new String[]{id},
+                null);
+
+        // Get first result
+        int columnIndex = cursor.getColumnIndex(column[0]);
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+        cursor.close();
+
+        return filePath;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_form);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         realm = Realm.getDefaultInstance();
 
@@ -135,6 +164,23 @@ public class EventFormActivity extends FragmentActivity
         mSubmitButton = (FloatingActionButton) findViewById(R.id.form_submit_button);
 
         setupTitleError();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_event_view, menu);
+        return true;
+    }
+
+    public void onDelete(MenuItem menuItem) {
+        // Remove from database
+//        realm.beginTransaction();
+//
+//        Event event = mEvents.get(pos);
+//        event.removeFromRealm();
+//
+//        realm.commitTransaction();
+
     }
 
     public void onSubmit(View v) {
@@ -217,40 +263,9 @@ public class EventFormActivity extends FragmentActivity
         }
     }
 
-    public static String getRealPathFromURI(Context context, Uri uri){
-        String filePath = "";
-
-        // Extract the COLUMN_DOCUMENT_ID from the given URI.
-        String docID = DocumentsContract.getDocumentId(uri);
-
-        // Split at colon, use second item in the array
-        // ex. image:90 --> retrieve 90
-        String id = docID.split(":")[1];
-
-        String[] column = { MediaStore.Images.Media.DATA };
-
-        // where id is equal to
-        String selection = MediaStore.Images.Media._ID + "=?";
-
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                column,
-                selection,
-                new String[]{ id },
-                null);
-
-        // Get first result
-        int columnIndex = cursor.getColumnIndex(column[0]);
-        if (cursor.moveToFirst()) {
-            filePath = cursor.getString(columnIndex);
-        }
-        cursor.close();
-
-        return filePath;
-    }
-
     /**
      * Converts date and time string to long
+     *
      * @param date string
      * @param time string
      * @return long representing date and time in milliseconds
