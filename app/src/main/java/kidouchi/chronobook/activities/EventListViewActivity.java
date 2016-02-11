@@ -25,6 +25,7 @@ public class EventListViewActivity extends Activity {
 
     private Realm realm;
     private ItemTouchHelper mItemTouchHelper;
+    private ArrayList<Event> mEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,8 @@ public class EventListViewActivity extends Activity {
         RealmResults<Event> result = realm.where(Event.class).findAll();
         result.sort("startDateTime"); // Sorts in ascending order
         Event[] events = new Event[result.size()];
-        RVEventAdapter adapter = new RVEventAdapter(
-                new ArrayList<>(Arrays.asList(result.toArray(events))), this, rvEventList);
+        mEvents = new ArrayList<>(Arrays.asList(result.toArray(events)));
+        RVEventAdapter adapter = new RVEventAdapter(mEvents, this, rvEventList);
         adapter.notifyDataSetChanged();
 
         rvEventList.setAdapter(adapter);
@@ -68,8 +69,10 @@ public class EventListViewActivity extends Activity {
                 new EventItemClickListener.OnItemInteraction() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        Event event = mEvents.get(position);
                         Intent eventViewIntent = new Intent(EventListViewActivity.this,
                                 EventViewScrollingActivity.class);
+
                         startActivity(eventViewIntent);
                     }
                 }));
