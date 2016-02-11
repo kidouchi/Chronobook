@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +81,7 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
-            implements EventCardTouchViewHolder {
+            implements EventCardTouchViewHolder, View.OnClickListener {
 
         private ImageView mPlaceholderImageView;
         private TextView mEventTitle;
@@ -167,6 +168,11 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
                 itemView.animate().setDuration(SELECT_ANIM_DURATION).translationZ(2.0f);
                 itemView.setElevation(2.0f);
             }
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.d("Clicked", "rv event adapter");
         }
     }
 }

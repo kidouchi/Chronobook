@@ -39,8 +39,26 @@
         <activity
             android:name=".activities.EventFormActivity"
             android:label="@string/title_activity_event_form"
+            android:parentActivityName=".activities.EventListViewActivity"
             android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="kidouchi.chronobook.activities.EventListViewActivity"/>
         </activity>
+        <activity
+            android:name=".activities.EventViewScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:parentActivityName=".activities.EventListViewActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="kidouchi.chronobook.activities.EventListViewActivity"/>
+        </activity>
+
+
+
+
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -53,12 +71,15 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key"/>
 
-        <receiver android:name="kidouchi.chronobook.AlarmReceiver"
-                  android:process=":remote"
-                  android:enabled="true"/>
+        <receiver
+            android:name=".alarm.AlarmReceiver"
+            android:enabled="true"
+            android:process=":remote"/>
 
-        <service android:name="kidouchi.chronobook.AlarmIntentService"
-                 android:exported="false" />
+        <service
+            android:name=".alarm.AlarmIntentService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

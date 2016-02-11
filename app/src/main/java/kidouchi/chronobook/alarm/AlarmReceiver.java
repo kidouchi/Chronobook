@@ -1,8 +1,10 @@
-package kidouchi.chronobook;
+package kidouchi.chronobook.alarm;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import kidouchi.chronobook.alarm.AlarmIntentService;
 
 /**
  * Created by iuy407 on 12/20/15.

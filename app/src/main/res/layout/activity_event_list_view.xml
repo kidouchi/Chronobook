@@ -23,7 +23,7 @@
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="@dimen/fab_margin"
         android:layout_marginRight="@dimen/fab_margin"
-        android:src="@drawable/ic_edit_white_48dp"
+        android:src="@drawable/ic_add_white_36dp"
         app:layout_anchor="@id/rv_event_list"
         app:layout_anchorGravity="bottom|right|end"/>
 

@@ -1,9 +1,11 @@
-package kidouchi.chronobook;
+package kidouchi.chronobook.alarm;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+
+import kidouchi.chronobook.R;
 
 /**
  * Created by iuy407 on 12/20/15.

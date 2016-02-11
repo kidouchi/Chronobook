@@ -43,7 +43,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import io.realm.Realm;
-import kidouchi.chronobook.AlarmReceiver;
+import kidouchi.chronobook.alarm.AlarmReceiver;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.RoundedCornersImageView;
 import kidouchi.chronobook.fragments.EventCategoryFragment;
@@ -94,6 +94,7 @@ public class EventFormActivity extends AppCompatActivity
     private Button pressedButton; // Holds reference to what button was most recently pressed
     private int categoryDrawableId = 0; // Holds most recently chosen category drawable id
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
+    private Event event;
 
     public static String getRealPathFromURI(Context context, Uri uri) {
         String filePath = "";
@@ -168,8 +169,11 @@ public class EventFormActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_event_view, menu);
-        return true;
+        if (event != null) {
+            getMenuInflater().inflate(R.menu.menu_event_view, menu);
+            return true;
+        }
+        return false;
     }
 
     public void onDelete(MenuItem menuItem) {

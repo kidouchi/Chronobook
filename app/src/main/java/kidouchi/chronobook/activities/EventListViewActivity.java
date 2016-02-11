@@ -16,6 +16,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import kidouchi.chronobook.EventCardTouchCallback;
+import kidouchi.chronobook.EventItemClickListener;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.adapters.RVEventAdapter;
 import kidouchi.chronobook.models.Event;
@@ -37,7 +38,7 @@ public class EventListViewActivity extends Activity {
                 Intent openFormIntent = new Intent(EventListViewActivity.this,
                         EventFormActivity.class);
                 openFormIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                openFormIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                openFormIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(openFormIntent);
             }
         });
@@ -63,6 +64,17 @@ public class EventListViewActivity extends Activity {
         rvEventList.setLayoutManager(layoutManager);
         rvEventList.setNestedScrollingEnabled(false);
         rvEventList.setHasFixedSize(false);
+        rvEventList.addOnItemTouchListener(new EventItemClickListener(this,
+                new EventItemClickListener.OnItemInteraction() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Intent eventViewIntent = new Intent(EventListViewActivity.this,
+                                EventViewScrollingActivity.class);
+                        startActivity(eventViewIntent);
+                    }
+                }));
+//        rvEventList.setItemAnimator(new SlideInUpAnimator());
+//        rvEventList.addOnItemTouchListener(new EventItemClickListener());
 
         ItemTouchHelper.Callback cb = new EventCardTouchCallback(adapter);
         mItemTouchHelper = new ItemTouchHelper(cb);

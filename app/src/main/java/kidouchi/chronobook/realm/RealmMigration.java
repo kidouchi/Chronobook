@@ -1,4 +1,4 @@
-package kidouchi.chronobook;
+package kidouchi.chronobook.realm;
 
 import io.realm.DynamicRealm;
 import io.realm.RealmSchema;
