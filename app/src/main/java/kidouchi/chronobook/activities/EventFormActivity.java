@@ -1,5 +1,6 @@
 package kidouchi.chronobook.activities;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -8,22 +9,19 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -43,9 +41,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import io.realm.Realm;
-import kidouchi.chronobook.alarm.AlarmReceiver;
+import kidouchi.chronobook.EventFormValidator;
+import kidouchi.chronobook.ImageUtil;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.RoundedCornersImageView;
+import kidouchi.chronobook.alarm.AlarmReceiver;
 import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
@@ -56,9 +56,7 @@ public class EventFormActivity extends AppCompatActivity
 
     private static final int REQUEST_CHOOSE_IMAGE = 1012;
 
-    /**
-     * VIEWS
-     **/
+    /******************  VIEWS  ******************/
     private EditText mTitleEditText;
     private EditText mDescEditText;
     private EditText mStreetEditText;
@@ -77,6 +75,7 @@ public class EventFormActivity extends AppCompatActivity
     private TextView mStartDateTextView;
     private TextView mEndDateTextView;
 
+    private CheckBox allDayCheckbox;
     private Button mStartTimeBtn;
     private Button mEndTimeBtn;
     private TextView mStartTimeTextView;
@@ -86,47 +85,13 @@ public class EventFormActivity extends AppCompatActivity
     private ImageView mCategoryImageView;
     private FloatingActionButton mSubmitButton;
 
-    /**
-     * GLOBAL VARIABLES
-     **/
+    /******************  GLOBAL VARIABLES  ******************/
     private Realm realm;
     private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
     private Button pressedButton; // Holds reference to what button was most recently pressed
     private int categoryDrawableId = 0; // Holds most recently chosen category drawable id
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
     private Event event;
-
-    public static String getRealPathFromURI(Context context, Uri uri) {
-        String filePath = "";
-
-        // Extract the COLUMN_DOCUMENT_ID from the given URI.
-        String docID = DocumentsContract.getDocumentId(uri);
-
-        // Split at colon, use second item in the array
-        // ex. image:90 --> retrieve 90
-        String id = docID.split(":")[1];
-
-        String[] column = {MediaStore.Images.Media.DATA};
-
-        // where id is equal to
-        String selection = MediaStore.Images.Media._ID + "=?";
-
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                column,
-                selection,
-                new String[]{id},
-                null);
-
-        // Get first result
-        int columnIndex = cursor.getColumnIndex(column[0]);
-        if (cursor.moveToFirst()) {
-            filePath = cursor.getString(columnIndex);
-        }
-        cursor.close();
-
-        return filePath;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,25 +110,26 @@ public class EventFormActivity extends AppCompatActivity
         mStateSpinner = (Spinner) findViewById(R.id.event_form_state);
 
         mPlaceholderTextView = (TextView) findViewById(R.id.event_form_placeholder_text_view);
-//        mPlaceholderImageView = (ImageView) findViewById(R.id.event_form_placeholder_image_view);
         mPlaceholderImageView = (RoundedCornersImageView) findViewById(R.id.event_form_placeholder_image_view);
         mPlaceholderUploadBtn = (Button) findViewById(R.id.event_form_placeholder_upload_btn);
 
         mStartDateBtn = (Button) findViewById(R.id.event_form_start_date_btn);
         mEndDateBtn = (Button) findViewById(R.id.event_form_end_date_btn);
-        mStartDateTextView = (TextView) findViewById(R.id.event_form_start_date_btn_text_view);
-        mEndDateTextView = (TextView) findViewById(R.id.event_form_end_date_btn_text_view);
+        mStartDateTextView = (TextView) findViewById(R.id.event_form_start_date_text_view);
+        mEndDateTextView = (TextView) findViewById(R.id.event_form_end_date_text_view);
 
+        allDayCheckbox = (CheckBox) findViewById(R.id.all_day_checkbox);
         mStartTimeBtn = (Button) findViewById(R.id.event_form_start_time_btn);
         mEndTimeBtn = (Button) findViewById(R.id.event_form_end_time_btn);
-        mStartTimeTextView = (TextView) findViewById(R.id.event_form_start_time_btn_text_view);
-        mEndTimeTextView = (TextView) findViewById(R.id.event_form_end_time_btn_text_view);
+        mStartTimeTextView = (TextView) findViewById(R.id.event_form_start_time_text_view);
+        mEndTimeTextView = (TextView) findViewById(R.id.event_form_end_time_text_view);
 
         mEventLocation = (EditText) findViewById(R.id.event_form_address);
         mCategoryImageView = (ImageView) findViewById(R.id.category_image_view);
 
         mSubmitButton = (FloatingActionButton) findViewById(R.id.form_submit_button);
 
+        // Setup form validation here
         setupTitleError();
     }
 
@@ -178,13 +144,11 @@ public class EventFormActivity extends AppCompatActivity
 
     public void onDelete(MenuItem menuItem) {
         // Remove from database
-//        realm.beginTransaction();
-//
-//        Event event = mEvents.get(pos);
-//        event.removeFromRealm();
-//
-//        realm.commitTransaction();
-
+        realm.beginTransaction();
+        if (event != null) {
+            event.removeFromRealm();
+        }
+        realm.commitTransaction();
     }
 
     public void onSubmit(View v) {
@@ -230,9 +194,14 @@ public class EventFormActivity extends AppCompatActivity
         realm.copyToRealmOrUpdate(event);
         realm.commitTransaction();
 
+        // Hide soft keyboard whenever outside an input field
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+
         Intent intent = new Intent(this, EventListViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
@@ -263,7 +232,7 @@ public class EventFormActivity extends AppCompatActivity
                     .into(mPlaceholderImageView);
 
             Uri uri = data.getData();
-            placeholderFilepath = getRealPathFromURI(this, uri);
+            placeholderFilepath = ImageUtil.getRealPathFromURI(this, uri);
         }
     }
 
@@ -282,33 +251,62 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     private void setupTitleError() {
-        final TextInputLayout titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
-        if (!mTitleEditText.isFocused()) {
-            if (mTitleEditText.getText().length() == 0) {
-                titleLabel.setError(getString(R.string.title_required));
-                titleLabel.setErrorEnabled(true);
-            }
-        }
+        final TextInputLayout titleLabel = (TextInputLayout)findViewById(R.id.event_form_title_label);
+        final EditText titleET = titleLabel.getEditText();
 
-        titleLabel.getEditText().addTextChangedListener(new TextWatcher() {
+        titleET.addTextChangedListener(new EventFormValidator(titleET) {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (mTitleEditText.isFocused()) {
-                    if (s.length() > 0) {
-                        titleLabel.setErrorEnabled(false);
-                    }
+            public void validate(String s) {
+                if (s.length() == 0) {
+                    titleLabel.setError(getString(R.string.error_field_required));
+                    titleLabel.setErrorEnabled(true);
+                } else {
+                    titleLabel.setErrorEnabled(false);
                 }
             }
+        });
+    }
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+    private void setupDescriptionError() {
+        final TextInputLayout descLabel = (TextInputLayout)findViewById(R.id.event_form_desc_label);
+        final EditText descET = descLabel.getEditText();
 
+        descET.addTextChangedListener(new EventFormValidator(descET) {
             @Override
-            public void afterTextChanged(Editable s) {
+            public void validate(String s) {
+                if (s.length() == 0) {
+                    descLabel.setError(getString(R.string.error_field_required));
+                    descLabel.setErrorEnabled(true);
+                } else {
+                    descLabel.setErrorEnabled(false);
+                }
             }
         });
+    }
 
+    /**
+     * Will automatically adjust start and end DATE when they are incorrect
+     */
+    private void setupDate() {
+
+    }
+
+    /**
+     * Will automatically adjust start and end TIME when they are incorrect
+     */
+    private void setupTimeError() {
+
+        if (allDayCheckbox.isChecked()) {
+            mStartTimeTextView.setVisibility(View.GONE);
+            mStartTimeBtn.setVisibility(View.GONE);
+            mEndTimeTextView.setVisibility(View.GONE);
+            mEndTimeBtn.setVisibility(View.GONE);
+        } else {
+            mStartTimeTextView.setVisibility(View.VISIBLE);
+            mStartTimeBtn.setVisibility(View.VISIBLE);
+            mEndTimeTextView.setVisibility(View.VISIBLE);
+            mEndTimeBtn.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

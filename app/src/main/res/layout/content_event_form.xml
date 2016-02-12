@@ -111,7 +111,7 @@
                     android:textColor="#fff"/>
 
                 <TextView
-                    android:id="@+id/event_form_start_date_btn_text_view"
+                    android:id="@+id/event_form_start_date_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/event_form_button_and_field_height"
                     android:layout_gravity="center_vertical"
@@ -147,7 +147,7 @@
                     android:textColor="#fff"/>
 
                 <TextView
-                    android:id="@+id/event_form_end_date_btn_text_view"
+                    android:id="@+id/event_form_end_date_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/event_form_button_and_field_height"
                     android:layout_gravity="center_vertical"
@@ -162,7 +162,7 @@
             </LinearLayout>
 
             <CheckBox
-                android:id="@+id/checkBox"
+                android:id="@+id/all_day_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -190,7 +190,7 @@
                     android:textColor="#fff"/>
 
                 <TextView
-                    android:id="@+id/event_form_start_time_btn_text_view"
+                    android:id="@+id/event_form_start_time_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/event_form_button_and_field_height"
                     android:layout_gravity="center_vertical"
@@ -226,7 +226,7 @@
                     android:textColor="#fff"/>
 
                 <TextView
-                    android:id="@+id/event_form_end_time_btn_text_view"
+                    android:id="@+id/event_form_end_time_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/event_form_button_and_field_height"
                     android:layout_gravity="center_vertical"

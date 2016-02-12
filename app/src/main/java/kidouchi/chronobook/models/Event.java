@@ -1,15 +1,12 @@
 package kidouchi.chronobook.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by iuy407 on 11/19/15.
  */
-public class Event extends RealmObject implements Parcelable {
+public class Event extends RealmObject {
 
     @PrimaryKey
     private int id;
@@ -105,45 +102,44 @@ public class Event extends RealmObject implements Parcelable {
 //        this.contact = contact;
 //    }
 
-    private Event(Parcel in) {
-        id = in.readInt();
-        title = in.readString();
-        placeHolderFilepath = in.readString();
-        description = in.readString();
-        startDateTime = in.readLong();
-        endDateTime = in.readLong();
-        location = (Location) in.readParcelable(Location.class.getClassLoader());
-        categoryDrawable = in.readInt();
-    }
-
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(title);
-        dest.writeString(placeHolderFilepath);
-        dest.writeString(description);
-        dest.writeLong(startDateTime);
-        dest.writeLong(endDateTime);
-        dest.writeParcelable(location, flags);
-        dest.writeInt(categoryDrawable);
-    }
-
-    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
-
-        @Override
-        public Event createFromParcel(Parcel source) {
-            return new Event(source);
-        }
-
-        @Override
-        public Event[] newArray(int size) {
-            return new Event[size];
-        }
-    };
+//    private Event(Parcel in) {
+//        id = in.readInt();
+//        title = in.readString();
+//        placeHolderFilepath = in.readString();
+//        description = in.readString();
+//        startDateTime = in.readLong();
+//        endDateTime = in.readLong();
+//        location = (Location) in.readParcelable(Location.class.getClassLoader());
+//        categoryDrawable = in.readInt();
+//    }
+//
+//    @Override
+//    public int describeContents() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void writeToParcel(Parcel dest, int flags) {
+//        dest.writeInt(id);
+//        dest.writeString(title);
+//        dest.writeString(placeHolderFilepath);
+//        dest.writeString(description);
+//        dest.writeLong(startDateTime);
+//        dest.writeLong(endDateTime);
+//        dest.writeParcelable(location, flags);
+//        dest.writeInt(categoryDrawable);
+//    }
+//
+//    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+//
+//        @Override
+//        public Event createFromParcel(Parcel source) {
+//            return new Event(source);
+//        }
+//
+//        @Override
+//        public Event[] newArray(int size) {
+//            return new Event[size];
+//        }
+//    };
 }

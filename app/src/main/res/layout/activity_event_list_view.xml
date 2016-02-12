@@ -10,6 +10,32 @@
     android:fitsSystemWindows="true"
     tools:context="kidouchi.chronobook.activities.EventListViewActivity">
 
+    <LinearLayout
+        android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/empty_list_msg"
+            android:textAlignment="center"/>
+        <Button
+            android:id="@+id/getting_started_btn"
+            android:layout_width="200dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@color/colorAccent"
+            android:text="@string/first_event_btn_msg"/>
+    </LinearLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_event_list"
         android:layout_width="match_parent"
