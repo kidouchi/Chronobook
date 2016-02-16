@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +16,13 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
 import kidouchi.chronobook.EventCardTouchHelperAdapter;
 import kidouchi.chronobook.EventCardTouchViewHolder;
 import kidouchi.chronobook.R;
+import kidouchi.chronobook.TimeConverterUtil;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
 
@@ -81,7 +79,7 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
-            implements EventCardTouchViewHolder, View.OnClickListener {
+            implements EventCardTouchViewHolder {
 
         private ImageView mPlaceholderImageView;
         private TextView mEventTitle;
@@ -110,8 +108,6 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             mCard = (RelativeLayout) itemView.findViewById(R.id.event_card);
             mCardHeader = (RelativeLayout) itemView.findViewById(R.id.card_header);
             mCardBody = (LinearLayout) itemView.findViewById(R.id.card_body);
-//            mEventAlarm = (TextView) itemView.findViewById(R.id.event_alarm);
-//            mEventDescription = (TextView) itemView.findViewById(R.id.event_description);
         }
 
         public void bindEventToView(Event event) {
@@ -127,27 +123,18 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             }
 
             // Converting timestamp in date and time format
-            Date startDateTime = new Date(event.getStartDateTime());
-            Date endDateTime = new Date(event.getEndDateTime());
+            String startDate = TimeConverterUtil.convertMilliToString(event.getStartDateTime(), "MMM dd");
+            String endDate = TimeConverterUtil.convertMilliToString(event.getEndDateTime(), "MMM dd");
 
-            SimpleDateFormat formatDate = new SimpleDateFormat("MMM dd");
-            SimpleDateFormat formatTimeMeridiem = new SimpleDateFormat("hh:mm a");
+            String startTime = TimeConverterUtil.convertMilliToString(event.getStartDateTime(), "hh:mm a");
+            String endTime = TimeConverterUtil.convertMilliToString(event.getEndDateTime(), "hh:mm a");
 
-            /** Format to date and time **/
-            String startDateFormatted = formatDate.format(startDateTime);
-            String startTimeFormatted = formatTimeMeridiem.format(startDateTime);
-
-            String endDateFormatted = formatDate.format(endDateTime);
-            String endTimeFormatted = formatTimeMeridiem.format(endDateTime);
-
-            mEventDate.setText(startDateFormatted + " - " + endDateFormatted);
-            mEventTime.setText(startTimeFormatted + " - " + endTimeFormatted);
+            mEventDate.setText(startDate + " - " + endDate);
+            mEventTime.setText(startTime + " - " + endTime);
 
             Location loc = event.getLocation();
             mEventLocation.setText(loc.getStreet() + " " + loc.getCity() + ", " +
                     loc.getState() + " " + loc.getZipcode());
-
-//            mEventDescription.setText(event.getDescription());
         }
 
         @Override
@@ -168,11 +155,6 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
                 itemView.animate().setDuration(SELECT_ANIM_DURATION).translationZ(2.0f);
                 itemView.setElevation(2.0f);
             }
-        }
-
-        @Override
-        public void onClick(View v) {
-            Log.d("Clicked", "rv event adapter");
         }
     }
 }

@@ -37,14 +37,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import io.realm.Realm;
 import kidouchi.chronobook.EventFormValidator;
 import kidouchi.chronobook.ImageUtil;
 import kidouchi.chronobook.R;
 import kidouchi.chronobook.RoundedCornersImageView;
+import kidouchi.chronobook.TimeConverterUtil;
 import kidouchi.chronobook.alarm.AlarmReceiver;
 import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
@@ -56,7 +55,9 @@ public class EventFormActivity extends AppCompatActivity
 
     private static final int REQUEST_CHOOSE_IMAGE = 1012;
 
-    /******************  VIEWS  ******************/
+    /******************
+     * VIEWS
+     ******************/
     private EditText mTitleEditText;
     private EditText mDescEditText;
     private EditText mStreetEditText;
@@ -66,7 +67,6 @@ public class EventFormActivity extends AppCompatActivity
 
     private TextView mPlaceholderTextView;
     private Bitmap mPlaceholderBitmap;
-    //    private ImageView mPlaceholderImageView;
     private RoundedCornersImageView mPlaceholderImageView;
     private Button mPlaceholderUploadBtn;
 
@@ -85,7 +85,9 @@ public class EventFormActivity extends AppCompatActivity
     private ImageView mCategoryImageView;
     private FloatingActionButton mSubmitButton;
 
-    /******************  GLOBAL VARIABLES  ******************/
+    /******************
+     * GLOBAL VARIABLES
+     ******************/
     private Realm realm;
     private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
     private Button pressedButton; // Holds reference to what button was most recently pressed
@@ -176,13 +178,12 @@ public class EventFormActivity extends AppCompatActivity
         event.setTitle(mTitleEditText.getText().toString());
         event.setDescription(mDescEditText.getText().toString());
         try {
-            long startDateTime = convertDateTimeToLong(
+            long startDateTime = TimeConverterUtil.convertDateTimeToLong(
                     mStartDateTextView.getText().toString(),
-                    mStartTimeTextView.getText().toString()
-            );
+                    mStartTimeTextView.getText().toString());
             event.setStartDateTime(startDateTime);
             setAlarm(startDateTime, event.getTitle()); // Set alarm notification when event starts
-            event.setEndDateTime(convertDateTimeToLong(
+            event.setEndDateTime(TimeConverterUtil.convertDateTimeToLong(
                     mEndDateTextView.getText().toString(),
                     mEndTimeTextView.getText().toString()
             ));
@@ -236,22 +237,8 @@ public class EventFormActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Converts date and time string to long
-     *
-     * @param date string
-     * @param time string
-     * @return long representing date and time in milliseconds
-     * @throws ParseException
-     */
-    private long convertDateTimeToLong(String date, String time) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a MM/dd/yyyy", Locale.US);
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        return dateFormat.parse(time + " " + date).getTime();
-    }
-
     private void setupTitleError() {
-        final TextInputLayout titleLabel = (TextInputLayout)findViewById(R.id.event_form_title_label);
+        final TextInputLayout titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
         final EditText titleET = titleLabel.getEditText();
 
         titleET.addTextChangedListener(new EventFormValidator(titleET) {
@@ -268,7 +255,7 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     private void setupDescriptionError() {
-        final TextInputLayout descLabel = (TextInputLayout)findViewById(R.id.event_form_desc_label);
+        final TextInputLayout descLabel = (TextInputLayout) findViewById(R.id.event_form_desc_label);
         final EditText descET = descLabel.getEditText();
 
         descET.addTextChangedListener(new EventFormValidator(descET) {
@@ -285,17 +272,9 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     /**
-     * Will automatically adjust start and end DATE when they are incorrect
-     */
-    private void setupDate() {
-
-    }
-
-    /**
      * Will automatically adjust start and end TIME when they are incorrect
      */
-    private void setupTimeError() {
-
+    public void onAllDayChecked(View v) {
         if (allDayCheckbox.isChecked()) {
             mStartTimeTextView.setVisibility(View.GONE);
             mStartTimeBtn.setVisibility(View.GONE);
@@ -309,6 +288,28 @@ public class EventFormActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Check the dates are correct and adjust if needed
+     */
+    private void checkDates() {
+        try {
+            // Check both dates are not empty
+            if (mStartDateTextView.getText().length() > 0 &&
+                    mEndDateTextView.getText().length() > 0) {
+                Date start = TimeConverterUtil.convertStringToDate(
+                                mStartDateTextView.getText().toString());
+                Date end = TimeConverterUtil.convertStringToDate(
+                                mEndDateTextView.getText().toString());
+                // Adjust END date when it's before START date
+                if (start.after(end)) {
+                    mEndDateTextView.setText(mStartDateTextView.getText());
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         if (pressedButton != null) {
@@ -318,6 +319,29 @@ public class EventFormActivity extends AppCompatActivity
             if (pressedButton.getId() == R.id.event_form_end_date_btn) {
                 mEndDateTextView.setText(monthOfYear + 1 + "/" + dayOfMonth + "/" + year);
             }
+            checkDates(); // Check dates make sense and adjust accordingly
+        }
+    }
+
+    /**
+     * Check the times are correct and adjust if needed
+     */
+    private void checkTimes() {
+        try {
+            // Check both times are not empty
+            if (mStartTimeTextView.getText().length() > 0 &&
+                    mEndTimeTextView.getText().length() > 0) {
+                Date start = TimeConverterUtil.convertStringToTime(
+                                    mStartTimeTextView.getText().toString());
+                Date end = TimeConverterUtil.convertStringToTime(
+                                    mEndTimeTextView.getText().toString());
+                // Adjust END time when it's before START time
+                if (start.after(end)) {
+                    mEndTimeTextView.setText(mStartTimeTextView.getText());
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 
@@ -327,13 +351,15 @@ public class EventFormActivity extends AppCompatActivity
         try {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
             final Date date = dateFormat.parse(hourOfDay + ":" + minute);
+            String time = new SimpleDateFormat("h:mm a").format(date);
             if (pressedButton != null) {
                 if (pressedButton.getId() == R.id.event_form_start_time_btn) {
-                    mStartTimeTextView.setText(new SimpleDateFormat("h:mm a").format(date));
+                    mStartTimeTextView.setText(time);
                 }
                 if (pressedButton.getId() == R.id.event_form_end_time_btn) {
-                    mEndTimeTextView.setText(new SimpleDateFormat("h:mm a").format(date));
+                    mEndTimeTextView.setText(time);
                 }
+                checkTimes(); // Check times make sense and adjust accordingly
             }
         } catch (ParseException e) {
             e.printStackTrace();
