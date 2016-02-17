@@ -7,9 +7,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import kidouchi.chronobook.R;
 
-public class EventViewScrollingActivity extends AppCompatActivity {
+public class EventViewScrollingActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    private MapFragment mMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,5 +35,16 @@ public class EventViewScrollingActivity extends AppCompatActivity {
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.google_map_fragment);
+        mMapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Place is here")
+                .draggable(true));
     }
 }

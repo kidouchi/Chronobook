@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ public class EventListViewActivity extends Activity {
     private ItemTouchHelper mItemTouchHelper;
     private ArrayList<Event> mEvents;
 
+    private Button mGettingStartedBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +46,8 @@ public class EventListViewActivity extends Activity {
                 startActivity(openFormIntent);
             }
         });
+
+        mGettingStartedBtn = (Button) findViewById(R.id.getting_started_btn);
 
         RealmConfiguration realmConfig = new RealmConfiguration.Builder(this)
                 .deleteRealmIfMigrationNeeded()
@@ -82,6 +87,12 @@ public class EventListViewActivity extends Activity {
         ItemTouchHelper.Callback cb = new EventCardTouchCallback(adapter);
         mItemTouchHelper = new ItemTouchHelper(cb);
         mItemTouchHelper.attachToRecyclerView(rvEventList);
+    }
+
+    public void gettingStarted(View v) {
+        Intent startIntent = new Intent(this, EventViewScrollingActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startIntent);
     }
 
     @Override

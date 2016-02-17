@@ -1,4 +1,4 @@
-package kidouchi.chronobook;
+package kidouchi.chronobook.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

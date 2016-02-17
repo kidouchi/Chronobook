@@ -1,4 +1,4 @@
-package kidouchi.chronobook;
+package kidouchi.chronobook.util;
 
 import android.content.Context;
 import android.database.Cursor;

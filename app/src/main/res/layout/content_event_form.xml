@@ -32,7 +32,7 @@
                 android:text="Placeholder"
                 android:textSize="18dp"/>
 
-            <kidouchi.chronobook.RoundedCornersImageView
+            <kidouchi.chronobook.views.RoundedCornersImageView
                 android:id="@+id/event_form_placeholder_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
@@ -245,19 +245,27 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                app:counterEnabled="true"
-                app:counterMaxLength="80">
-                <EditText
+                android:layout_marginTop="10dp">
+                <!--app:counterEnabled="true"-->
+                <!--app:counterMaxLength="80"-->
+                <!--<EditText-->
+                    <!--android:id="@+id/event_form_address"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginBottom="15dp"-->
+                    <!--android:layout_marginTop="15dp"-->
+                    <!--android:drawableLeft="@drawable/ic_location_on_grey_36dp"-->
+                    <!--android:hint="Street Address"-->
+                    <!--android:inputType="textPostalAddress"-->
+                    <!--android:maxLength="80"/>-->
+                <MultiAutoCompleteTextView
                     android:id="@+id/event_form_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginTop="15dp"
-                    android:drawableLeft="@drawable/ic_location_on_grey_36dp"
+                    android:singleLine="true"
                     android:hint="Street Address"
                     android:inputType="textPostalAddress"
-                    android:maxLength="80"/>
+                    android:drawableLeft="@drawable/ic_location_on_grey_36dp"/>
             </android.support.design.widget.TextInputLayout>
 
             <!-- CITY, STATE, ZIPCODE -->
@@ -322,7 +330,7 @@
                     android:layout_height="@dimen/event_form_button_and_field_height"
                     android:layout_marginRight="10dp"
                     android:layout_weight="2"
-                    android:background="@color/wallet_holo_blue_light"
+                    android:background="@color/event_category_button_color"
                     android:ems="7"
                     android:gravity="center"
                     android:onClick="showEventCategoryDialog"

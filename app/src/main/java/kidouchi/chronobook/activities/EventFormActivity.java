@@ -16,21 +16,30 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
@@ -40,27 +49,28 @@ import java.util.Date;
 
 import io.realm.Realm;
 import kidouchi.chronobook.EventFormValidator;
-import kidouchi.chronobook.ImageUtil;
 import kidouchi.chronobook.R;
-import kidouchi.chronobook.RoundedCornersImageView;
-import kidouchi.chronobook.TimeConverterUtil;
 import kidouchi.chronobook.alarm.AlarmReceiver;
 import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
+import kidouchi.chronobook.util.Constants;
+import kidouchi.chronobook.util.ImageUtil;
+import kidouchi.chronobook.util.TimeConverterUtil;
+import kidouchi.chronobook.views.RoundedCornersImageView;
 
 public class EventFormActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener,
-        EventCategoryFragment.CategoryChosenListener {
-
-    private static final int REQUEST_CHOOSE_IMAGE = 1012;
+        EventCategoryFragment.CategoryChosenListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     /******************
      * VIEWS
      ******************/
     private EditText mTitleEditText;
     private EditText mDescEditText;
-    private EditText mStreetEditText;
+    private MultiAutoCompleteTextView mStreetTextView;
+
     private EditText mCityEditText;
     private EditText mZipcodeEditText;
     private Spinner mStateSpinner;
@@ -85,15 +95,17 @@ public class EventFormActivity extends AppCompatActivity
     private ImageView mCategoryImageView;
     private FloatingActionButton mSubmitButton;
 
+    private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
+    private Button pressedButton; // Holds reference to what button was most recently pressed
+
     /******************
      * GLOBAL VARIABLES
      ******************/
     private Realm realm;
-    private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
-    private Button pressedButton; // Holds reference to what button was most recently pressed
     private int categoryDrawableId = 0; // Holds most recently chosen category drawable id
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
     private Event event;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +118,7 @@ public class EventFormActivity extends AppCompatActivity
 
         mTitleEditText = (EditText) findViewById(R.id.event_form_title);
         mDescEditText = (EditText) findViewById(R.id.event_form_description);
-        mStreetEditText = (EditText) findViewById(R.id.event_form_address);
+        mStreetTextView = (MultiAutoCompleteTextView) findViewById(R.id.event_form_address);
         mCityEditText = (EditText) findViewById(R.id.event_form_city);
         mZipcodeEditText = (EditText) findViewById(R.id.event_form_zipcode);
         mStateSpinner = (Spinner) findViewById(R.id.event_form_state);
@@ -133,6 +145,13 @@ public class EventFormActivity extends AppCompatActivity
 
         // Setup form validation here
         setupTitleError();
+
+        // Create the location client to start receiving updates
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
     @Override
@@ -142,6 +161,22 @@ public class EventFormActivity extends AppCompatActivity
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Connect to google api client
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        // Disconnect with google api client
+        mGoogleApiClient.disconnect();
+
+        super.onStop();
     }
 
     public void onDelete(MenuItem menuItem) {
@@ -161,7 +196,7 @@ public class EventFormActivity extends AppCompatActivity
         Number locMaxId = realm.where(Location.class).max("id");
         int nextLocId = (locMaxId != null) ? (locMaxId.intValue() + 1) : 0;
         loc.setId(nextLocId);
-        loc.setStreet(mStreetEditText.getText().toString());
+        loc.setStreet(mStreetTextView.getText().toString());
         loc.setState(mStateSpinner.getSelectedItem().toString());
         loc.setCity(mCityEditText.getText().toString());
         loc.setZipcode(mZipcodeEditText.getText().toString());
@@ -221,13 +256,13 @@ public class EventFormActivity extends AppCompatActivity
         choosePictureIntent.setType("image/*");
         choosePictureIntent.setAction(Intent.ACTION_GET_CONTENT);
         choosePictureIntent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(choosePictureIntent, REQUEST_CHOOSE_IMAGE);
+        startActivityForResult(choosePictureIntent, Constants.REQUEST_CHOOSE_IMAGE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CHOOSE_IMAGE && resultCode == RESULT_OK) {
+        if (requestCode == Constants.REQUEST_CHOOSE_IMAGE && resultCode == RESULT_OK) {
             Picasso.with(this)
                     .load(data.getData())
                     .into(mPlaceholderImageView);
@@ -250,6 +285,32 @@ public class EventFormActivity extends AppCompatActivity
                 } else {
                     titleLabel.setErrorEnabled(false);
                 }
+            }
+        });
+    }
+
+    // TODO: REMOVE LATER JUST A MARKER
+    private void setupPlaceAutoComplete() {
+        ArrayAdapter adapter;
+        mStreetTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString();
+//                LatLngBounds bounds = LatLngBounds.
+                int autocompleteFilter = AutocompleteFilter.TYPE_FILTER_NONE;
+//                PendingResult<AutocompletePredictionBuffer> result =
+//                        Places.GeoDataApi.getAutocompletePredictions(mGoogleApiClient, query,
+//                                bounds, autocompleteFilter);
             }
         });
     }
@@ -399,6 +460,22 @@ public class EventFormActivity extends AppCompatActivity
         if (!realm.isClosed()) {
             realm.close();
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d("FAILURE", "Google Api Connection");
+
     }
 
     // Date picker dialog for when user needs to set start/end date

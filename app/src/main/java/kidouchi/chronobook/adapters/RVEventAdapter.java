@@ -22,7 +22,7 @@ import io.realm.Realm;
 import kidouchi.chronobook.EventCardTouchHelperAdapter;
 import kidouchi.chronobook.EventCardTouchViewHolder;
 import kidouchi.chronobook.R;
-import kidouchi.chronobook.TimeConverterUtil;
+import kidouchi.chronobook.util.TimeConverterUtil;
 import kidouchi.chronobook.models.Event;
 import kidouchi.chronobook.models.Location;
 
