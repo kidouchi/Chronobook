@@ -243,29 +243,29 @@
 
             <!-- STREET ADDRESS -->
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/event_street_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp">
-                <!--app:counterEnabled="true"-->
-                <!--app:counterMaxLength="80"-->
-                <!--<EditText-->
-                    <!--android:id="@+id/event_form_address"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginBottom="15dp"-->
-                    <!--android:layout_marginTop="15dp"-->
-                    <!--android:drawableLeft="@drawable/ic_location_on_grey_36dp"-->
-                    <!--android:hint="Street Address"-->
-                    <!--android:inputType="textPostalAddress"-->
-                    <!--android:maxLength="80"/>-->
-                <MultiAutoCompleteTextView
+
+                <EditText
                     android:id="@+id/event_form_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp"
+                    android:drawableLeft="@drawable/ic_location_on_grey_36dp"
                     android:hint="Street Address"
                     android:inputType="textPostalAddress"
-                    android:drawableLeft="@drawable/ic_location_on_grey_36dp"/>
+                    android:maxLength="80"/>
+                <!--<MultiAutoCompleteTextView-->
+                    <!--android:id="@+id/event_form_address"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:singleLine="true"-->
+                    <!--android:hint="Street Address"-->
+                    <!--android:inputType="textPostalAddress"-->
+                    <!--android:drawableLeft="@drawable/ic_location_on_grey_36dp"/>-->
             </android.support.design.widget.TextInputLayout>
 
             <!-- CITY, STATE, ZIPCODE -->
@@ -277,6 +277,7 @@
                 android:weightSum="10">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/event_city_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
@@ -301,6 +302,7 @@
                     android:spinnerMode="dropdown"/>
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/event_zipcode_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="3">

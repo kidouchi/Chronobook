@@ -146,4 +146,5 @@
     <string name="empty_list_msg">You currently have no events! Let\'s get you started.</string>
     <string name="first_event_btn_msg">Create New Event</string>
     <string name="event_form_new_event">New Event</string>
+    <string name="not_valid_zipcode">This is not a valid zipcode</string>
 </resources>

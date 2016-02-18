@@ -12,25 +12,22 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -39,7 +36,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompleteFilter;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
@@ -69,8 +65,9 @@ public class EventFormActivity extends AppCompatActivity
      ******************/
     private EditText mTitleEditText;
     private EditText mDescEditText;
-    private MultiAutoCompleteTextView mStreetTextView;
 
+//    private MultiAutoCompleteTextView mStreetTextView;
+    private EditText mStreetEditText;
     private EditText mCityEditText;
     private EditText mZipcodeEditText;
     private Spinner mStateSpinner;
@@ -106,6 +103,7 @@ public class EventFormActivity extends AppCompatActivity
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
     private Event event;
     private GoogleApiClient mGoogleApiClient;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +116,8 @@ public class EventFormActivity extends AppCompatActivity
 
         mTitleEditText = (EditText) findViewById(R.id.event_form_title);
         mDescEditText = (EditText) findViewById(R.id.event_form_description);
-        mStreetTextView = (MultiAutoCompleteTextView) findViewById(R.id.event_form_address);
+
+        mStreetEditText = (EditText) findViewById(R.id.event_form_address);
         mCityEditText = (EditText) findViewById(R.id.event_form_city);
         mZipcodeEditText = (EditText) findViewById(R.id.event_form_zipcode);
         mStateSpinner = (Spinner) findViewById(R.id.event_form_state);
@@ -145,6 +144,8 @@ public class EventFormActivity extends AppCompatActivity
 
         // Setup form validation here
         setupTitleError();
+        setupDescriptionError();
+        setupLocationError();
 
         // Create the location client to start receiving updates
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -152,6 +153,8 @@ public class EventFormActivity extends AppCompatActivity
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+//        setupPlaceAutoComplete();
     }
 
     @Override
@@ -190,13 +193,12 @@ public class EventFormActivity extends AppCompatActivity
 
     public void onSubmit(View v) {
         // Insert location into DB
-
         realm.beginTransaction();
         Location loc = new Location();
         Number locMaxId = realm.where(Location.class).max("id");
         int nextLocId = (locMaxId != null) ? (locMaxId.intValue() + 1) : 0;
         loc.setId(nextLocId);
-        loc.setStreet(mStreetTextView.getText().toString());
+        loc.setStreet(mStreetEditText.getText().toString());
         loc.setState(mStateSpinner.getSelectedItem().toString());
         loc.setCity(mCityEditText.getText().toString());
         loc.setZipcode(mZipcodeEditText.getText().toString());
@@ -212,19 +214,31 @@ public class EventFormActivity extends AppCompatActivity
         event.setPlaceHolderFilepath(placeholderFilepath);
         event.setTitle(mTitleEditText.getText().toString());
         event.setDescription(mDescEditText.getText().toString());
+
+        // Converting time
         try {
+            String startTime;
+            String endTime;
+            if (allDayCheckbox.isChecked()) {
+                startTime = endTime = "12:00 AM";
+            } else {
+                startTime =  mStartTimeTextView.getText().toString();
+                endTime = mEndTimeTextView.getText().toString();
+            }
+
             long startDateTime = TimeConverterUtil.convertDateTimeToLong(
                     mStartDateTextView.getText().toString(),
-                    mStartTimeTextView.getText().toString());
+                    startTime);
             event.setStartDateTime(startDateTime);
             setAlarm(startDateTime, event.getTitle()); // Set alarm notification when event starts
             event.setEndDateTime(TimeConverterUtil.convertDateTimeToLong(
                     mEndDateTextView.getText().toString(),
-                    mEndTimeTextView.getText().toString()
+                    endTime
             ));
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
         event.setLocation(loc);
         event.setCategoryDrawable(categoryDrawableId);
         realm.copyToRealmOrUpdate(event);
@@ -274,9 +288,8 @@ public class EventFormActivity extends AppCompatActivity
 
     private void setupTitleError() {
         final TextInputLayout titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
-        final EditText titleET = titleLabel.getEditText();
 
-        titleET.addTextChangedListener(new EventFormValidator(titleET) {
+        mTitleEditText.addTextChangedListener(new EventFormValidator(mTitleEditText) {
             @Override
             public void validate(String s) {
                 if (s.length() == 0) {
@@ -289,37 +302,10 @@ public class EventFormActivity extends AppCompatActivity
         });
     }
 
-    // TODO: REMOVE LATER JUST A MARKER
-    private void setupPlaceAutoComplete() {
-        ArrayAdapter adapter;
-        mStreetTextView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String query = s.toString();
-//                LatLngBounds bounds = LatLngBounds.
-                int autocompleteFilter = AutocompleteFilter.TYPE_FILTER_NONE;
-//                PendingResult<AutocompletePredictionBuffer> result =
-//                        Places.GeoDataApi.getAutocompletePredictions(mGoogleApiClient, query,
-//                                bounds, autocompleteFilter);
-            }
-        });
-    }
-
     private void setupDescriptionError() {
         final TextInputLayout descLabel = (TextInputLayout) findViewById(R.id.event_form_desc_label);
-        final EditText descET = descLabel.getEditText();
 
-        descET.addTextChangedListener(new EventFormValidator(descET) {
+        mDescEditText.addTextChangedListener(new EventFormValidator(mDescEditText) {
             @Override
             public void validate(String s) {
                 if (s.length() == 0) {
@@ -327,6 +313,50 @@ public class EventFormActivity extends AppCompatActivity
                     descLabel.setErrorEnabled(true);
                 } else {
                     descLabel.setErrorEnabled(false);
+                }
+            }
+        });
+    }
+
+    private void setupLocationError() {
+        final TextInputLayout streetLabel = (TextInputLayout) findViewById(R.id.event_street_label);
+        final TextInputLayout cityLabel = (TextInputLayout) findViewById(R.id.event_city_label);
+        final TextInputLayout zipcodeLabel = (TextInputLayout) findViewById(R.id.event_zipcode_label);
+
+        mStreetEditText.addTextChangedListener(new EventFormValidator(mStreetEditText) {
+            @Override
+            public void validate(String s) {
+                if (s.length() == 0) {
+                    streetLabel.setError(getString(R.string.error_field_required));
+                    streetLabel.setErrorEnabled(true);
+                } else {
+                    streetLabel.setErrorEnabled(false);
+                }
+            }
+        });
+
+        mCityEditText.addTextChangedListener(new EventFormValidator(mCityEditText) {
+            @Override
+            public void validate(String s) {
+                if (s.length() == 0) {
+                    cityLabel.setError(getString(R.string.error_field_required));
+                    cityLabel.setErrorEnabled(true);
+                } else {
+                    cityLabel.setErrorEnabled(false);
+                }
+            }
+        });
+
+        mZipcodeEditText.addTextChangedListener(new EventFormValidator(mZipcodeEditText) {
+            @Override
+            public void validate(String s) {
+                if (s.length() == 0) {
+                    zipcodeLabel.setError(getString(R.string.error_field_required));
+                    zipcodeLabel.setErrorEnabled(true);
+                } else if (s.length() < 5) {
+                    zipcodeLabel.setError(getString(R.string.not_valid_zipcode));
+                } else {
+                    zipcodeLabel.setErrorEnabled(false);
                 }
             }
         });
@@ -503,4 +533,45 @@ public class EventFormActivity extends AppCompatActivity
                     0, 0, false);
         }
     }
+
+
+    // TODO: REMOVE LATER JUST A MARKER
+//    private void setupPlaceAutoComplete() {
+//        mStreetTextView = (MultiAutoCompleteTextView) findViewById(R.id.event_form_address);
+//        PlacesAutoCompleteAdapter adapter = new PlacesAutoCompleteAdapter(this,
+//                R.layout.place_autocomplete_item_prediction, mGoogleApiClient);
+//        mStreetTextView.setAdapter(adapter);
+//        mStreetTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                mStreetTextView.setText((String) parent.getItemAtPosition(position));
+//            }
+//        });
+//
+//        mStreetTextView.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//                // Remove all callbacks and messages
+//                mHandler.removeCallbacksAndMessages(null);
+//
+//                mHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        adapter.re
+//                    }
+//                }, 500);
+//            }
+//        });
+//    }
 }
