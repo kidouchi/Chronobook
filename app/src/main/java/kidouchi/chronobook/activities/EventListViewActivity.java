@@ -46,9 +46,9 @@ public class EventListViewActivity extends Activity {
                 startActivity(openFormIntent);
             }
         });
-
         mGettingStartedBtn = (Button) findViewById(R.id.getting_started_btn);
 
+        // Setup Realm
         RealmConfiguration realmConfig = new RealmConfiguration.Builder(this)
                 .deleteRealmIfMigrationNeeded()
                 .build();
@@ -63,6 +63,11 @@ public class EventListViewActivity extends Activity {
         mEvents = new ArrayList<>(Arrays.asList(result.toArray(events)));
         RVEventAdapter adapter = new RVEventAdapter(mEvents, this, rvEventList);
         adapter.notifyDataSetChanged();
+
+        // When there are events, then hide "getting started" view
+        if (events.length > 0) {
+            findViewById(android.R.id.empty).setVisibility(View.GONE);
+        }
 
         rvEventList.setAdapter(adapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);

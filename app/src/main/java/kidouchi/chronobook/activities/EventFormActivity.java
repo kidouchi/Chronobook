@@ -221,19 +221,6 @@ public class EventFormActivity extends AppCompatActivity
     }
     public void onSubmit(View v) {
         if (isValidForm()) {
-            // Insert location into DB
-//            realm.beginTransaction();
-//            Location loc = new Location();
-//            Number locMaxId = realm.where(Location.class).max("id");
-//            int nextLocId = (locMaxId != null) ? (locMaxId.intValue() + 1) : 0;
-//            loc.setId(nextLocId);
-//            loc.setStreet(mLocation.getText().toString());
-//            loc.setState(mStateSpinner.getSelectedItem().toString());
-//            loc.setCity(mCityEditText.getText().toString());
-//            loc.setZipcode(mZipcodeEditText.getText().toString());
-//            realm.copyToRealmOrUpdate(loc);
-//            realm.commitTransaction();
-
             // Insert Event into DB
             realm.beginTransaction();
             Event event = new Event();
