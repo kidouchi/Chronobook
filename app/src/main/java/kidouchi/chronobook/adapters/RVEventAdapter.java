@@ -22,9 +22,8 @@ import io.realm.Realm;
 import kidouchi.chronobook.EventCardTouchHelperAdapter;
 import kidouchi.chronobook.EventCardTouchViewHolder;
 import kidouchi.chronobook.R;
-import kidouchi.chronobook.util.TimeConverterUtil;
 import kidouchi.chronobook.models.Event;
-import kidouchi.chronobook.models.Location;
+import kidouchi.chronobook.util.TimeConverterUtil;
 
 /**
  * Created by iuy407 on 11/21/15.
@@ -132,9 +131,7 @@ public class RVEventAdapter extends RecyclerView.Adapter<RVEventAdapter.ViewHold
             mEventDate.setText(startDate + " - " + endDate);
             mEventTime.setText(startTime + " - " + endTime);
 
-            Location loc = event.getLocation();
-            mEventLocation.setText(loc.getStreet() + " " + loc.getCity() + ", " +
-                    loc.getState() + " " + loc.getZipcode());
+            mEventLocation.setText(event.getLocation());
         }
 
         @Override

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
+    android:id="@+id/event_form_coord_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,6 +10,7 @@
     tools:context="kidouchi.chronobook.activities.EventFormActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/form_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -22,17 +24,21 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_event_form"/>
+    <include
+        android:id="@+id/form_content"
+        layout="@layout/content_event_form"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/form_submit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        app:backgroundTint="@color/colorPrimary"
         android:layout_margin="@dimen/fab_margin"
-        app:fabSize="normal"
         android:onClick="onSubmit"
-        android:src="@drawable/ic_done_white_36dp"/>
+        android:src="@drawable/ic_done_white_36dp"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabSize="normal"
+        app:layout_anchor="@id/form_content"
+        app:layout_anchorGravity="bottom|right|end"/>
 
 </android.support.design.widget.CoordinatorLayout>

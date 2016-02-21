@@ -147,4 +147,7 @@
     <string name="first_event_btn_msg">Create New Event</string>
     <string name="event_form_new_event">New Event</string>
     <string name="not_valid_zipcode">This is not a valid zipcode</string>
+    <string name="snackbar_confirm">Okay</string>
+    <string name="invalid_form_msg">You\'re missing some things...</string>
+    <string name="date_passed_error_msg">This date has passed</string>
 </resources>

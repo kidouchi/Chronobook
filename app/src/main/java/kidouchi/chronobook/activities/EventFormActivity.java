@@ -1,6 +1,5 @@
 package kidouchi.chronobook.activities;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -12,8 +11,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,21 +21,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
@@ -49,7 +46,6 @@ import kidouchi.chronobook.R;
 import kidouchi.chronobook.alarm.AlarmReceiver;
 import kidouchi.chronobook.fragments.EventCategoryFragment;
 import kidouchi.chronobook.models.Event;
-import kidouchi.chronobook.models.Location;
 import kidouchi.chronobook.util.Constants;
 import kidouchi.chronobook.util.ImageUtil;
 import kidouchi.chronobook.util.TimeConverterUtil;
@@ -67,10 +63,10 @@ public class EventFormActivity extends AppCompatActivity
     private EditText mDescEditText;
 
 //    private MultiAutoCompleteTextView mStreetTextView;
-    private EditText mStreetEditText;
-    private EditText mCityEditText;
-    private EditText mZipcodeEditText;
-    private Spinner mStateSpinner;
+    private EditText mLocation;
+//    private EditText mCityEditText;
+//    private EditText mZipcodeEditText;
+//    private Spinner mStateSpinner;
 
     private TextView mPlaceholderTextView;
     private Bitmap mPlaceholderBitmap;
@@ -95,6 +91,13 @@ public class EventFormActivity extends AppCompatActivity
     private EventCategoryFragment eventCategoryFragment; // Event catgory dialog
     private Button pressedButton; // Holds reference to what button was most recently pressed
 
+    private TextInputLayout titleLabel;
+    private TextInputLayout descLabel;
+    private TextInputLayout locationLabel;
+
+
+    private CoordinatorLayout mCoordContent;
+
     /******************
      * GLOBAL VARIABLES
      ******************/
@@ -102,13 +105,15 @@ public class EventFormActivity extends AppCompatActivity
     private int categoryDrawableId = 0; // Holds most recently chosen category drawable id
     private String placeholderFilepath = ""; // Holds placeholder image filepath chosen
     private Event event;
-    private GoogleApiClient mGoogleApiClient;
-    private Handler mHandler;
+//    private GoogleApiClient mGoogleApiClient;
+//    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_form);
+
+//        Log.d("CHECK", )
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -117,10 +122,10 @@ public class EventFormActivity extends AppCompatActivity
         mTitleEditText = (EditText) findViewById(R.id.event_form_title);
         mDescEditText = (EditText) findViewById(R.id.event_form_description);
 
-        mStreetEditText = (EditText) findViewById(R.id.event_form_address);
-        mCityEditText = (EditText) findViewById(R.id.event_form_city);
-        mZipcodeEditText = (EditText) findViewById(R.id.event_form_zipcode);
-        mStateSpinner = (Spinner) findViewById(R.id.event_form_state);
+        mLocation = (EditText) findViewById(R.id.event_location);
+//        mCityEditText = (EditText) findViewById(R.id.event_form_city);
+//        mZipcodeEditText = (EditText) findViewById(R.id.event_form_zipcode);
+//        mStateSpinner = (Spinner) findViewById(R.id.event_form_state);
 
         mPlaceholderTextView = (TextView) findViewById(R.id.event_form_placeholder_text_view);
         mPlaceholderImageView = (RoundedCornersImageView) findViewById(R.id.event_form_placeholder_image_view);
@@ -137,22 +142,41 @@ public class EventFormActivity extends AppCompatActivity
         mStartTimeTextView = (TextView) findViewById(R.id.event_form_start_time_text_view);
         mEndTimeTextView = (TextView) findViewById(R.id.event_form_end_time_text_view);
 
-        mEventLocation = (EditText) findViewById(R.id.event_form_address);
+        mEventLocation = (EditText) findViewById(R.id.event_location);
         mCategoryImageView = (ImageView) findViewById(R.id.category_image_view);
 
         mSubmitButton = (FloatingActionButton) findViewById(R.id.form_submit_button);
+
+        titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
+        titleLabel.setErrorEnabled(true);
+        descLabel = (TextInputLayout) findViewById(R.id.event_form_desc_label);
+        descLabel.setErrorEnabled(true);
+        locationLabel = (TextInputLayout) findViewById(R.id.event_location_label);
+        locationLabel.setErrorEnabled(true);
+//        cityLabel = (TextInputLayout) findViewById(R.id.event_city_label);
+//        cityLabel.setErrorEnabled(true);
+//        zipcodeLabel = (TextInputLayout) findViewById(R.id.event_zipcode_label);
+//        zipcodeLabel.setErrorEnabled(true);
+
+        mCoordContent = (CoordinatorLayout)
+                findViewById(android.R.id.content).findViewById(R.id.event_form_coord_layout);
 
         // Setup form validation here
         setupTitleError();
         setupDescriptionError();
         setupLocationError();
 
+        // Hide soft keyboard whenever outside an input field
+//        InputMethodManager inputMethodManager =
+//                (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+//        inputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+
         // Create the location client to start receiving updates
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .addApi(LocationServices.API)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .build();
 
 //        setupPlaceAutoComplete();
     }
@@ -171,13 +195,13 @@ public class EventFormActivity extends AppCompatActivity
         super.onStart();
 
         // Connect to google api client
-        mGoogleApiClient.connect();
+//        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
         // Disconnect with google api client
-        mGoogleApiClient.disconnect();
+//        mGoogleApiClient.disconnect();
 
         super.onStop();
     }
@@ -191,68 +215,77 @@ public class EventFormActivity extends AppCompatActivity
         realm.commitTransaction();
     }
 
+    public boolean isValidForm() {
+        return !(titleLabel.isErrorEnabled() || descLabel.isErrorEnabled()
+                || locationLabel.isErrorEnabled());
+    }
     public void onSubmit(View v) {
-        // Insert location into DB
-        realm.beginTransaction();
-        Location loc = new Location();
-        Number locMaxId = realm.where(Location.class).max("id");
-        int nextLocId = (locMaxId != null) ? (locMaxId.intValue() + 1) : 0;
-        loc.setId(nextLocId);
-        loc.setStreet(mStreetEditText.getText().toString());
-        loc.setState(mStateSpinner.getSelectedItem().toString());
-        loc.setCity(mCityEditText.getText().toString());
-        loc.setZipcode(mZipcodeEditText.getText().toString());
-        realm.copyToRealmOrUpdate(loc);
-        realm.commitTransaction();
+        if (isValidForm()) {
+            // Insert location into DB
+//            realm.beginTransaction();
+//            Location loc = new Location();
+//            Number locMaxId = realm.where(Location.class).max("id");
+//            int nextLocId = (locMaxId != null) ? (locMaxId.intValue() + 1) : 0;
+//            loc.setId(nextLocId);
+//            loc.setStreet(mLocation.getText().toString());
+//            loc.setState(mStateSpinner.getSelectedItem().toString());
+//            loc.setCity(mCityEditText.getText().toString());
+//            loc.setZipcode(mZipcodeEditText.getText().toString());
+//            realm.copyToRealmOrUpdate(loc);
+//            realm.commitTransaction();
 
-        // Insert Event into DB
-        realm.beginTransaction();
-        Event event = new Event();
-        Number eventMaxId = realm.where(Event.class).max("id");
-        int nextEventId = (eventMaxId != null) ? (eventMaxId.intValue() + 1) : 0;
-        event.setId(nextEventId);
-        event.setPlaceHolderFilepath(placeholderFilepath);
-        event.setTitle(mTitleEditText.getText().toString());
-        event.setDescription(mDescEditText.getText().toString());
+            // Insert Event into DB
+            realm.beginTransaction();
+            Event event = new Event();
+            Number eventMaxId = realm.where(Event.class).max("id");
+            int nextEventId = (eventMaxId != null) ? (eventMaxId.intValue() + 1) : 0;
+            event.setId(nextEventId);
+            event.setPlaceHolderFilepath(placeholderFilepath);
+            event.setTitle(mTitleEditText.getText().toString());
+            event.setDescription(mDescEditText.getText().toString());
 
-        // Converting time
-        try {
-            String startTime;
-            String endTime;
-            if (allDayCheckbox.isChecked()) {
-                startTime = endTime = "12:00 AM";
-            } else {
-                startTime =  mStartTimeTextView.getText().toString();
-                endTime = mEndTimeTextView.getText().toString();
+            // Converting time
+            try {
+                String startTime;
+                String endTime;
+                if (allDayCheckbox.isChecked()) {
+                    startTime = endTime = "12:00 AM";
+                } else {
+                    startTime = mStartTimeTextView.getText().toString();
+                    endTime = mEndTimeTextView.getText().toString();
+                }
+
+                long startDateTime = TimeConverterUtil.convertDateTimeToLong(
+                        mStartDateTextView.getText().toString(),
+                        startTime);
+                event.setStartDateTime(startDateTime);
+                setAlarm(startDateTime, event.getTitle()); // Set alarm notification when event starts
+                event.setEndDateTime(TimeConverterUtil.convertDateTimeToLong(
+                        mEndDateTextView.getText().toString(),
+                        endTime
+                ));
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
 
-            long startDateTime = TimeConverterUtil.convertDateTimeToLong(
-                    mStartDateTextView.getText().toString(),
-                    startTime);
-            event.setStartDateTime(startDateTime);
-            setAlarm(startDateTime, event.getTitle()); // Set alarm notification when event starts
-            event.setEndDateTime(TimeConverterUtil.convertDateTimeToLong(
-                    mEndDateTextView.getText().toString(),
-                    endTime
-            ));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+            event.setLocation(mLocation.getText().toString());
+            event.setCategoryDrawable(categoryDrawableId);
+            realm.copyToRealmOrUpdate(event);
+            realm.commitTransaction();
 
-        event.setLocation(loc);
-        event.setCategoryDrawable(categoryDrawableId);
-        realm.copyToRealmOrUpdate(event);
-        realm.commitTransaction();
-
-        // Hide soft keyboard whenever outside an input field
-        InputMethodManager inputMethodManager =
-                (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
-
-        Intent intent = new Intent(this, EventListViewActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(this, EventListViewActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+            startActivity(intent);
+        } else {
+            Snackbar.make(mCoordContent, getString(R.string.invalid_form_msg), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.snackbar_confirm), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Do nothing
+                    }
+                }).show();
+        }
     }
 
     private void setAlarm(long targetDateTime, String eventTitle) {
@@ -287,8 +320,6 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     private void setupTitleError() {
-        final TextInputLayout titleLabel = (TextInputLayout) findViewById(R.id.event_form_title_label);
-
         mTitleEditText.addTextChangedListener(new EventFormValidator(mTitleEditText) {
             @Override
             public void validate(String s) {
@@ -303,8 +334,6 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     private void setupDescriptionError() {
-        final TextInputLayout descLabel = (TextInputLayout) findViewById(R.id.event_form_desc_label);
-
         mDescEditText.addTextChangedListener(new EventFormValidator(mDescEditText) {
             @Override
             public void validate(String s) {
@@ -319,47 +348,43 @@ public class EventFormActivity extends AppCompatActivity
     }
 
     private void setupLocationError() {
-        final TextInputLayout streetLabel = (TextInputLayout) findViewById(R.id.event_street_label);
-        final TextInputLayout cityLabel = (TextInputLayout) findViewById(R.id.event_city_label);
-        final TextInputLayout zipcodeLabel = (TextInputLayout) findViewById(R.id.event_zipcode_label);
-
-        mStreetEditText.addTextChangedListener(new EventFormValidator(mStreetEditText) {
+        mLocation.addTextChangedListener(new EventFormValidator(mLocation) {
             @Override
             public void validate(String s) {
                 if (s.length() == 0) {
-                    streetLabel.setError(getString(R.string.error_field_required));
-                    streetLabel.setErrorEnabled(true);
+                    locationLabel.setError(getString(R.string.error_field_required));
+                    locationLabel.setErrorEnabled(true);
                 } else {
-                    streetLabel.setErrorEnabled(false);
+                    locationLabel.setErrorEnabled(false);
                 }
             }
         });
+//
+//        mCityEditText.addTextChangedListener(new EventFormValidator(mCityEditText) {
+//            @Override
+//            public void validate(String s) {
+//                if (s.length() == 0) {
+//                    cityLabel.setError(getString(R.string.error_field_required));
+//                    cityLabel.setErrorEnabled(true);
+//                } else {
+//                    cityLabel.setErrorEnabled(false);
+//                }
+//            }
+//        });
 
-        mCityEditText.addTextChangedListener(new EventFormValidator(mCityEditText) {
-            @Override
-            public void validate(String s) {
-                if (s.length() == 0) {
-                    cityLabel.setError(getString(R.string.error_field_required));
-                    cityLabel.setErrorEnabled(true);
-                } else {
-                    cityLabel.setErrorEnabled(false);
-                }
-            }
-        });
-
-        mZipcodeEditText.addTextChangedListener(new EventFormValidator(mZipcodeEditText) {
-            @Override
-            public void validate(String s) {
-                if (s.length() == 0) {
-                    zipcodeLabel.setError(getString(R.string.error_field_required));
-                    zipcodeLabel.setErrorEnabled(true);
-                } else if (s.length() < 5) {
-                    zipcodeLabel.setError(getString(R.string.not_valid_zipcode));
-                } else {
-                    zipcodeLabel.setErrorEnabled(false);
-                }
-            }
-        });
+//        mZipcodeEditText.addTextChangedListener(new EventFormValidator(mZipcodeEditText) {
+//            @Override
+//            public void validate(String s) {
+//                if (s.length() == 0) {
+//                    zipcodeLabel.setError(getString(R.string.error_field_required));
+//                    zipcodeLabel.setErrorEnabled(true);
+//                } else if (s.length() < 5) {
+//                    zipcodeLabel.setError(getString(R.string.not_valid_zipcode));
+//                } else {
+//                    zipcodeLabel.setErrorEnabled(false);
+//                }
+//            }
+//        });
     }
 
     /**
@@ -383,14 +408,46 @@ public class EventFormActivity extends AppCompatActivity
      * Check the dates are correct and adjust if needed
      */
     private void checkDates() {
+        Calendar cal = Calendar.getInstance();
+        // Remove time, only want date
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date current = new Date(cal.getTimeInMillis());
         try {
-            // Check both dates are not empty
-            if (mStartDateTextView.getText().length() > 0 &&
-                    mEndDateTextView.getText().length() > 0) {
-                Date start = TimeConverterUtil.convertStringToDate(
-                                mStartDateTextView.getText().toString());
-                Date end = TimeConverterUtil.convertStringToDate(
-                                mEndDateTextView.getText().toString());
+            Date start = mStartDateTextView.getText().length() > 0 ?
+                    TimeConverterUtil.convertStringToDate(mStartDateTextView.getText().toString()) : null;
+            Date end = mEndDateTextView.getText().length() > 0 ?
+                    TimeConverterUtil.convertStringToDate(mEndDateTextView.getText().toString()) : null;
+            if (start != null) { // Check start date not empty
+                Log.d("Current time", current.toString());
+                if(start.before(current)) {
+                    mStartDateTextView.setText("");
+                    Snackbar.make(mCoordContent, R.string.date_passed_error_msg, Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.snackbar_confirm), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Do nothing
+                                }
+                            }).show();
+                }
+            }
+
+            if (end != null) { // Check end date not empty
+                if(end.before(current)) {
+                    mEndDateTextView.setText("");
+                    Snackbar.make(mCoordContent, R.string.date_passed_error_msg, Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.snackbar_confirm), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Do nothing
+                                }
+                            }).show();
+                }
+            }
+
+            if (start != null && end != null) { // Check both dates are not empty
                 // Adjust END date when it's before START date
                 if (start.after(end)) {
                     mEndDateTextView.setText(mStartDateTextView.getText());
@@ -419,7 +476,6 @@ public class EventFormActivity extends AppCompatActivity
      */
     private void checkTimes() {
         try {
-            // Check both times are not empty
             if (mStartTimeTextView.getText().length() > 0 &&
                     mEndTimeTextView.getText().length() > 0) {
                 Date start = TimeConverterUtil.convertStringToTime(

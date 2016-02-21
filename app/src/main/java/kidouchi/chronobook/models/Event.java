@@ -16,7 +16,7 @@ public class Event extends RealmObject {
     private String description;
     private long startDateTime;
     private long endDateTime;
-    private Location location;
+    private String location;
     //    private Category category;
     private int categoryDrawable;
 //    private Contact contact;
@@ -69,11 +69,11 @@ public class Event extends RealmObject {
         this.startDateTime = startDateTime;
     }
 
-    public Location getLocation() {
+    public String getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 
